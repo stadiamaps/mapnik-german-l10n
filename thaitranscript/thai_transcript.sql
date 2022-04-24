@@ -34,8 +34,12 @@ CREATE or REPLACE FUNCTION osml10n_thai_transcript(inpstr text) RETURNS TEXT AS 
   except:
     plpy.notice("tltk not installed, falling back to ICU")
     return(None)
-  
-  stlist=split_by_alphabet(inpstr)
+    
+  try:
+    stlist=split_by_alphabet(inpstr)
+  except:
+    plpy.notice("tltk error transcribing >%s<" % inpstr)
+    return(None)
 
   latin = ''
   for st in stlist:
