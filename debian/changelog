@@ -1,3 +1,9 @@
+osml10n (2.5.11) unstable; urgency=medium
+  
+  * Fix uncaught exception in Thai transcription
+  
+  -- Luke Seelenbinder <luke.seelenbinder@stadiamaps.com>
+
 osml10n (2.5.10) unstable; urgency=medium
 
   * Make this build on Debian 11
