@@ -19,6 +19,7 @@ Licence AGPL http://www.gnu.org/licenses/agpl-3.0.de.html
 #include <iconv.h>
 #include <utf8proc.h>
 #include <wchar.h>
+#include "varatt.h"
 
 #ifdef PG_MODULE_MAGIC
 PG_MODULE_MAGIC;
