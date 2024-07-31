@@ -24,6 +24,7 @@ extern "C" {
 #include <string.h>
 #include <mb/pg_wchar.h>
 #include <fmgr.h>
+#include "varatt.h"
 
 #ifdef PG_MODULE_MAGIC
 PG_MODULE_MAGIC;
