@@ -30,7 +30,7 @@ CREATE or REPLACE FUNCTION osml10n_thai_transcript(inpstr text) RETURNS TEXT AS 
     return(strlist)
   
   try:
-    import tltk.nlp
+    from tltk.nlp import th2roman
   except:
     plpy.notice("tltk not installed, falling back to ICU")
     return(None)
@@ -46,7 +46,7 @@ CREATE or REPLACE FUNCTION osml10n_thai_transcript(inpstr text) RETURNS TEXT AS 
     if (unicodedata.name(st[0]).split(' ')[0] == 'THAI'):
       transcript=''
       try:
-        transcript=tltk.nlp.th2roman(st).rstrip('<s/>').rstrip()
+        transcript=th2roman(st).rstrip('<s/>').rstrip()
       except:
         plpy.notice("tltk error transcribing >%s<" % st)
         return(None)
