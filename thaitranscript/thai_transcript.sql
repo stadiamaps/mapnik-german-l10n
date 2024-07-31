@@ -28,12 +28,16 @@ CREATE or REPLACE FUNCTION osml10n_thai_transcript(inpstr text) RETURNS TEXT AS 
       oldalphabet=alphabet
     strlist.append(target)
     return(strlist)
-  
+
+  # Delicate dance. Importing twice allows us to ignore an error when gensim isn't installed.
   try:
     from tltk.nlp import th2roman
   except:
-    plpy.notice("tltk not installed, falling back to ICU")
-    return(None)
+    try:
+      from tltk.nlp import th2roman
+    except:
+      plpy.notice("tltk not installed, falling back to ICU")
+      return(None)
     
   try:
     stlist=split_by_alphabet(inpstr)
