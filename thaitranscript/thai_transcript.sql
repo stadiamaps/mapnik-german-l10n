@@ -30,7 +30,7 @@ CREATE or REPLACE FUNCTION osml10n_thai_transcript(inpstr text) RETURNS TEXT AS 
     return(strlist)
   
   try:
-    import tltk
+    import tltk.nlp
   except:
     plpy.notice("tltk not installed, falling back to ICU")
     return(None)
