@@ -59,13 +59,23 @@ Datum osml10n_kanji_transcript(PG_FUNCTION_ARGS) {
 
   kakasi_getopt_argv(8,kakasi_argv);
   kakasi_out=kakasi_do(normalized);
-  free(normalized);
   if (kakasi_out==NULL) {
     ereport(ERROR, (errmsg("kakasi_do failed")));
+    free(normalized);
     PG_RETURN_NULL();
   }
 
   int32_t obufLen = strlen(kakasi_out);
+
+  if (!pg_verify_mbstr(GetDatabaseEncoding(), kakasi_out, obufLen, true)) {
+    ereport(NOTICE,
+            (errcode(ERRCODE_CHARACTER_NOT_IN_REPERTOIRE),
+             errmsg("kakasi error transcribing >%s<", normalized)));
+    kakasi_free(kakasi_out);
+    free(normalized);
+    PG_RETURN_NULL();
+  }
+  free(normalized);
 
   text *new_text = (text *) palloc(VARHDRSZ + obufLen);
   SET_VARSIZE(new_text, VARHDRSZ + obufLen);
