@@ -60,8 +60,8 @@ Datum osml10n_kanji_transcript(PG_FUNCTION_ARGS) {
   kakasi_getopt_argv(8,kakasi_argv);
   kakasi_out=kakasi_do(normalized);
   if (kakasi_out==NULL) {
-    ereport(ERROR, (errmsg("kakasi_do failed")));
     free(normalized);
+    ereport(ERROR, (errmsg("kakasi_do failed")));
     PG_RETURN_NULL();
   }
 
