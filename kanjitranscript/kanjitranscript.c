@@ -25,14 +25,27 @@ PG_MODULE_MAGIC;
 
 PG_FUNCTION_INFO_V1(osml10n_kanji_transcript);
 
+void _PG_init(void);
+
+void _PG_init(void) {
+  // Invoke kakasi in UTF-8 mode. The older EUC-JP path misromanized some
+  // characters (e.g. the kokuji 糀) and leaked EUC-JP lead bytes into the
+  // output, producing invalid UTF-8 downstream.
+  //
+  // kakasi_getopt_argv must be called exactly once per process: it opens
+  // the kanwa/itaiji dictionaries and an iconv descriptor for the internal
+  // EUC-JP <-> UTF-8 conversion. Calling it per-invocation leaks FILE
+  // handles and iconv descriptors, eventually corrupting libkakasi's
+  // static state — observed as silent empty output and, for some inputs,
+  // an infinite loop in the dictionary scan (perf top: _IO_getc + iconv).
+  static char *kakasi_argv[8]={"kakasi","-iutf8","-outf8","-Ja","-Ha","-Ka","-Ea","-s"};
+  kakasi_getopt_argv(8, kakasi_argv);
+}
+
 Datum osml10n_kanji_transcript(PG_FUNCTION_ARGS) {
   char *inbuf;
   char *normalized;
   char *kakasi_out;
-  // Invoke kakasi in UTF-8 mode. The older EUC-JP path misromanized some
-  // characters (e.g. the kokuji 糀) and leaked EUC-JP lead bytes into the
-  // output, producing invalid UTF-8 downstream.
-  char *kakasi_argv[8]={"kakasi","-iutf8","-outf8","-Ja","-Ha","-Ka","-Ea","-s"};
 
   if (GetDatabaseEncoding() != PG_UTF8) {
     ereport(ERROR,(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
@@ -57,7 +70,6 @@ Datum osml10n_kanji_transcript(PG_FUNCTION_ARGS) {
   }
   free(inbuf);
 
-  kakasi_getopt_argv(8,kakasi_argv);
   kakasi_out=kakasi_do(normalized);
   if (kakasi_out==NULL) {
     free(normalized);
