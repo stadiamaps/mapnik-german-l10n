@@ -67,8 +67,18 @@ Datum osml10n_translit(PG_FUNCTION_ARGS) {
     outbuf = (char *) realloc(outbuf, bufLen + 1);
     bufLen = ustr.extract(outbuf,bufLen,NULL,status);
   }
-  outbuf[bufLen] = '\0'; 
-  
+  outbuf[bufLen] = '\0';
+
+  if (!pg_verify_mbstr(GetDatabaseEncoding(), outbuf, bufLen, true)) {
+    ereport(NOTICE,
+            (errcode(ERRCODE_CHARACTER_NOT_IN_REPERTOIRE),
+             errmsg("ICU error transcribing >%s<", inbuf)));
+    free(inbuf);
+    free(outbuf);
+    delete latin_tl;
+    PG_RETURN_NULL();
+  }
+
   text *new_text = (text *) palloc(VARHDRSZ + bufLen);
   SET_VARSIZE(new_text, VARHDRSZ + bufLen);
   memcpy((void *) VARDATA(new_text), /* destination */
